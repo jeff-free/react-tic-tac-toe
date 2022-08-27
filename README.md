@@ -68,3 +68,7 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+### Key concepts of the implementation
+
+- For the time-travel feature, it is implemented via `re-render` caused by setState of method `#jumpToStep`. The `render` method specified the step of game by `history[this.state.stepNumber]`, instead of reassigning the `history` method.
