@@ -1,105 +1,83 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 
-class Game extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      history: [{
-        squares: Array(9).fill(null)
-      }],
-      stepNumber: 0,
-      xIsNext: true
-    }
-  }
+function Game() {
+  const [history, setHistory] = useState([{ squares: Array(9).fill(null) }])
+  const [stepNumber, setStepNumber] = useState(0)
+  const [xIsNext, setXIsNext] = useState(true)
+  const current = history[stepNumber]
 
-  handleClick(i) {
-    const history = this.state.history.slice(0, this.state.stepNumber + 1)
-    const current = history[history.length - 1]
+  const handleClick = (i) => {
+    const historyCopy = history.slice(0, stepNumber + 1)
     const squares = current.squares.slice()
     if (calculateWinner(squares) || squares[i]) { return }
 
-    this.state.xIsNext ? squares[i] = 'X' : squares[i] = 'O'
-    this.setState({
-      history: history.concat([
-        { squares: squares }
-      ]),
-      stepNumber: history.length,
-      xIsNext: !this.state.xIsNext })
+    xIsNext ? squares[i] = 'X' : squares[i] = 'O'
+    setHistory(historyCopy.concat([{ squares: squares }]))
+    setStepNumber(historyCopy.length)
+    setXIsNext(!xIsNext)
   }
 
-  getCurrent() {
-    const history = this.state.history
-    return(history[history.length - 1])
+  const jumpToStep = (step) => {
+    setStepNumber(step)
+    setXIsNext((step % 2) === 0)
   }
 
-  jumpToStep(step) {
-    this.setState({
-      stepNumber: step,
-      xIsNext: (step % 2) === 0
-    })
+  const winner = calculateWinner(current.squares)
+  let status
+  if (winner) {
+    status = `Winner: ${winner}`
+  } else {
+    status = `Next Player: ${xIsNext ? 'X' : 'O'}`
   }
-
-  render() {
-    const history = this.state.history
-    const current = history[this.state.stepNumber]
-    const winner = calculateWinner(current.squares)
-    let status
-    if (winner) {
-      status = status = `Winner: ${winner}`
-    } else {
-      status = `Next Player: ${this.state.xIsNext ? 'X' : 'O'}`
-    }
-    const moves = history.map((_step, move) => {
-      const text = move > 0 ? `Go to move #: ${move}` : 'Back to gamestart'
-      return(
-        <li key={move}>
-          <button onClick={() => this.jumpToStep(move)}>{text}</button>
-        </li>
-      )
-    })
+  const moves = history.map((_step, move) => {
+    const text = move > 0 ? `Go to move #: ${move}` : 'Back to gamestart'
     return(
-      <div className='game'>
+      <li key={move}>
+        <button onClick={() => jumpToStep(move)}>{text}</button>
+      </li>
+    )
+  })
+
+  return (
+    <div className='game'>
         <div className='game-board'>
-          <Board squares={current.squares} onClick={(i) => { this.handleClick(i) }} />
+          <Board squares={current.squares} onClick={(i) => { handleClick(i) }} />
         </div>
         <div className='game-info'>
           <div className='status'>{ status }</div>
           <div>{moves}</div>
         </div>
       </div>
-    )
-  }
+  )
 }
 
-class Board extends React.Component {
-  renderSquare(i) {
-    return <Square value={this.props.squares[i]}
-                   onClick={() => { this.props.onClick(i) } } />
-  }
+function Board(props) {
+  const renderSquare = (i) => (
+    <Square value={props.squares[i]}
+            onClick={() => { props.onClick(i) } } />
+  )
 
-  render() {
-    return (
-      <div>
-        <div className='board-row'>
-          { this.renderSquare(0) }
-          { this.renderSquare(1) }
-          { this.renderSquare(2) }
-        </div>
-        <div className='board-row'>
-          { this.renderSquare(3) }
-          { this.renderSquare(4) }
-          { this.renderSquare(5) }
-        </div>
-        <div className='board-row'>
-          { this.renderSquare(6) }
-          { this.renderSquare(7) }
-          { this.renderSquare(8) }
-        </div>
+  return (
+    <div>
+      <div className='board-row'>
+        { renderSquare(0) }
+        { renderSquare(1) }
+        { renderSquare(2) }
       </div>
-    )
-  }
+      <div className='board-row'>
+        { renderSquare(3) }
+        { renderSquare(4) }
+        { renderSquare(5) }
+      </div>
+      <div className='board-row'>
+        { renderSquare(6) }
+        { renderSquare(7) }
+        { renderSquare(8) }
+      </div>
+    </div>
+  )
 }
 
 function Square(props) {
